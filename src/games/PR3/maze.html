@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>🌀 НЕОНОВЫЙ ЛАБИРИНТ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #1a0033, #000033);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #e0f2fe;
+    overflow: hidden;
+}
+h1 {
+    font-size: 42px;
+    margin: 0 0 8px 0;
+    background: linear-gradient(90deg, #22d3ee, #c026d3, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(34, 211, 238, 0.6);
+}
+.stats {
+    display: flex;
+    gap: 40px;
+    margin: 15px 0;
+    font-size: 21px;
+    font-weight: 600;
+}
+.timer-container {
+    width: 320px;
+    height: 18px;
+    background: #1e2937;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2px solid #334155;
+    margin-bottom: 10px;
+}
+#timer-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #22d3ee, #c026d3);
+    transition: width 0.3s linear;
+}
+#message {
+    height: 68px;
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin: 15px 0;
+    text-shadow: 0 0 15px currentColor;
+}
+.maze {
+    display: grid;
+    gap: 5px;
+    background: #0f172a;
+    padding: 15px;
+    border: 8px solid #334155;
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(34, 211, 238, 0.4);
+}
+.cell {
+    width: 48px;
+    height: 48px;
+    background: #1e2937;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 32px;
+    transition: all 0.25s ease;
+}
+.wall { 
+    background: #475569 !important; 
+    box-shadow: inset 4px 4px 8px rgba(0,0,0,0.6);
+}
+.player { 
+    background: #f43f5e !important;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    box-shadow: 0 0 25px #f43f5e, 0 0 40px #e11d48;
+    animation: playerPulse 1.2s infinite alternate ease-in-out;
+}
+.finish { 
+    background: #4ade80 !important;
+    box-shadow: 0 0 30px #4ade80;
+    font-size: 36px;
+}
+@keyframes playerPulse {
+    from { transform: scale(0.95); }
+    to { transform: scale(1.15); }
+}
+.controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+button {
+    padding: 14px 28px;
+    font-size: 17px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-start { background: linear-gradient(45deg, #22d3ee, #06b67f); color: white; }
+.btn-new { background: linear-gradient(45deg, #c026d3, #7e22ce); color: white; }
+button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+.footer {
+    margin-top: 25px;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+/* Мигающий таймер в конце */
+.urgent #timer-bar {
+    animation: urgentPulse 0.4s infinite alternate;
+}
+@keyframes urgentPulse {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<h1>🌀 НЕОНОВЫЙ ЛАБИРИНТ</h1>
+
+<div class="stats">
+    <div>⏳ Время: <span id="timer-text">10</span>с</div>
+    <div>🚶 Шаги: <span id="steps">0</span></div>
+</div>
+
+<div class="timer-container">
+    <div id="timer-bar"></div>
+</div>
+
+<div id="maze" class="maze"></div>
+
+<div id="message">Нажми «Начать игру», чтобы стартовать</div>
+
+<div class="controls">
+    <button class="btn-start" onclick="startGame()">▶ Начать игру</button>
+    <button class="btn-new" onclick="newMaze()">🔄 Новый лабиринт</button>
+</div>
+
+<div class="footer">Управление: ← ↑ → ↓ или WASD</div>
+
+<script>
+// ==================== НАСТРОЙКИ ====================
+const SIZE = 10;
+let map = [];
+let playerPos = { x: 1, y: 1 };
+let timeLeft = 10;
+let steps = 0;
+let timerId = null;
+let gameActive = false;
+let lastSecond = 0;
+
+const mazeEl = document.getElementById('maze');
+const timerBar = document.getElementById('timer-bar');
+const timerText = document.getElementById('timer-text');
+const stepsEl = document.getElementById('steps');
+const messageEl = document.getElementById('message');
+const timerContainer = document.querySelector('.timer-container');
+
+function generateMaze() {
+    map = Array.from({length: SIZE}, () => Array(SIZE).fill(1));
+    
+    const stack = [];
+    let x = 1, y = 1;
+    map[y][x] = 0;
+    stack.push([x, y]);
+
+    const dirs = [[0,2],[2,0],[0,-2],[-2,0]];
+
+    while (stack.length) {
+        const current = stack[stack.length-1];
+        const neighbors = [];
+        for (let [dx, dy] of dirs) {
+            const nx = current[0] + dx;
+            const ny = current[1] + dy;
+            if (nx > 0 && nx < SIZE-1 && ny > 0 && ny < SIZE-1 && map[ny][nx] === 1) {
+                neighbors.push([nx, ny, dx, dy]);
+            }
+        }
+        if (neighbors.length > 0) {
+            const [nx, ny, dx, dy] = neighbors[Math.floor(Math.random() * neighbors.length)];
+            map[current[1] + dy/2][current[0] + dx/2] = 0;
+            map[ny][nx] = 0;
+            stack.push([nx, ny]);
+        } else {
+            stack.pop();
+        }
+    }
+
+    map[1][1] = 0;
+    map[SIZE-2][SIZE-2] = 3;
+
+    // Гарантированный коридор к финишу
+    for (let i = SIZE-4; i < SIZE-1; i++) {
+        if (map[SIZE-2][i] === 1) map[SIZE-2][i] = 0;
+    }
+
+    playerPos = { x: 1, y: 1 };
+}
+
+function drawMaze() {
+    mazeEl.innerHTML = '';
+    mazeEl.style.gridTemplateColumns = `repeat(${SIZE}, 48px)`;
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (map[y][x] === 1) cell.classList.add('wall');
+            if (map[y][x] === 3) {
+                cell.classList.add('finish');
+                cell.innerHTML = '🏁';
+            }
+            if (x === playerPos.x && y === playerPos.y) {
+                const p = document.createElement('div');
+                p.className = 'player';
+                cell.appendChild(p);
+            }
+            mazeEl.appendChild(cell);
+        }
+    }
+}
+
+function startGame() {
+    if (gameActive) return;
+    clearInterval(timerId);
+
+    timeLeft = 10;
+    steps = 0;
+    gameActive = true;
+    lastSecond = 0;
+
+    timerText.textContent = timeLeft;
+    stepsEl.textContent = steps;
+    timerBar.style.width = '100%';
+    timerBar.style.background = 'linear-gradient(90deg, #22d3ee, #c026d3)';
+    timerContainer.classList.remove('urgent');
+
+    messageEl.textContent = "Быстрее! У тебя всего 10 секунд!";
+    messageEl.style.color = "#67e8f9";
+
+    drawMaze();
+
+    timerId = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = timeLeft;
+        timerBar.style.width = `${(timeLeft / 10) * 100}%`;
+
+        // Ускорение и напряжение в конце
+        if (timeLeft <= 10) {
+            timerBar.style.background = 'linear-gradient(90deg, #f43f5e, #e11d48)';
+            timerContainer.classList.add('urgent');
+            
+            // Звуковой сигнал каждую секунду после 10 секунд
+            if (timeLeft !== lastSecond) {
+                lastSecond = timeLeft;
+                beep();
+            }
+        }
+
+        if (timeLeft <= 0) {
+            endGame("⏰ ВРЕМЯ ВЫШЛО!");
+        }
+    }, 1000);
+}
+
+function beep() {
+    try {
+        const audio = new AudioContext();
+        const oscillator = audio.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audio.currentTime);
+        const gain = audio.createGain();
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 80);
+    } catch(e) {}
+}
+
+function endGame(text) {
+    gameActive = false;
+    clearInterval(timerId);
+    timerContainer.classList.remove('urgent');
+    messageEl.innerHTML = `<strong>${text}</strong>`;
+    messageEl.style.color = text.includes("Победа") ? "#4ade80" : "#f43f5e";
+}
+
+function move(dx, dy) {
+    if (!gameActive) return;
+    const newX = playerPos.x + dx;
+    const newY = playerPos.y + dy;
+    if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE || map[newY][newX] === 1) return;
+
+    playerPos.x = newX;
+    playerPos.y = newY;
+    steps++;
+    stepsEl.textContent = steps;
+    drawMaze();
+
+    if (map[newY][newX] === 3) {
+        endGame("🎉 ПОБЕДА! Ты успел!");
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (!gameActive) return;
+    switch (e.key.toLowerCase()) {
+        case 'arrowup': case 'w': move(0, -1); break;
+        case 'arrowdown': case 's': move(0,  1); break;
+        case 'arrowleft': case 'a': move(-1, 0); break;
+        case 'arrowright': case 'd': move( 1, 0); break;
+    }
+});
+
+function newMaze() {
+    clearInterval(timerId);
+    gameActive = false;
+    generateMaze();
+    drawMaze();
+    messageEl.textContent = "Новый лабиринт готов. Нажми «Начать игру»";
+    messageEl.style.color = "#94a3b8";
+    timerBar.style.width = '100%';
+    timerContainer.classList.remove('urgent');
+}
+
+// Инициализация
+generateMaze();
+drawMaze();
+</script>
+</body>
+</html>

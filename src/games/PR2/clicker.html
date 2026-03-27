@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>⚡ Неоновый Кликер</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: white;
+}
+
+.game-container {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    padding: 35px 40px;
+    border-radius: 24px;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+h1 {
+    margin: 0 0 20px 0;
+    font-size: 32px;
+    background: linear-gradient(90deg, #00ffea, #ff00c8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    font-size: 18px;
+    background: rgba(0,0,0,0.3);
+    padding: 12px 18px;
+    border-radius: 12px;
+}
+
+#timer-bar {
+    height: 8px;
+    background: linear-gradient(90deg, #00ff88, #00ccff);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    transition: width 0.3s linear;
+}
+
+#click-btn {
+    width: 100%;
+    height: 140px;
+    font-size: 28px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff00c8, #00ffea);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(255, 0, 200, 0.5);
+    transition: all 0.1s;
+    position: relative;
+    overflow: hidden;
+}
+
+#click-btn:active {
+    transform: scale(0.92);
+    box-shadow: 0 5px 15px rgba(255, 0, 200, 0.7);
+}
+
+#score {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #fff;
+    text-shadow: 0 0 20px #00ffea;
+}
+
+.combo {
+    font-size: 22px;
+    color: #ffd700;
+    margin-bottom: 10px;
+    min-height: 30px;
+}
+
+.floating {
+    position: absolute;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ff00c8;
+    pointer-events: none;
+    animation: floatUp 1.2s forwards;
+    z-index: 10;
+}
+
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-120px); }
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+button.reset-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transition: 0.3s;
+}
+
+button.reset-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 13px;
+    opacity: 0.6;
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>⚡ НЕОНОВЫЙ КЛИКЕР</h1>
+    
+    <div class="stats">
+        <span>⏳ Время:</span>
+        <span id="timer">30</span>
+    </div>
+    <div id="timer-bar" style="width: 100%;"></div>
+
+    <div class="stats">
+        <span>🔥 Счёт:</span>
+        <span id="score">0</span>
+    </div>
+
+    <div class="combo" id="combo">Комбо: <span id="combo-count">0</span>x</div>
+
+    <button id="click-btn">НАЖМИ МЕНЯ!</button>
+
+    <div class="buttons">
+        <button class="reset-btn" id="restart-btn">Начать заново</button>
+        <button class="reset-btn" id="reset-all-btn">Сбросить рекорд</button>
+    </div>
+
+    <div class="footer">Рекорд: <span id="best-score">0</span></div>
+</div>
+
+<script>
+let score = 0;
+let timeLeft = 30;
+let combo = 0;
+let timerId = null;
+let isGameActive = false;
+let bestScore = localStorage.getItem('neonClickerBest') || 0;
+
+const scoreEl = document.getElementById('score');
+const timerEl = document.getElementById('timer');
+const timerBar = document.getElementById('timer-bar');
+const comboEl = document.getElementById('combo-count');
+const bestScoreEl = document.getElementById('best-score');
+const clickBtn = document.getElementById('click-btn');
+
+bestScoreEl.textContent = bestScore;
+
+// Звуки (можно отключить)
+function playClickSound() {
+    const audio = new Audio('https://freesound.org/data/previews/276/276952_5121236-lq.mp3');
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+}
+
+function createFloatingScore(x, y) {
+    const float = document.createElement('div');
+    float.className = 'floating';
+    float.textContent = `+1`;
+    float.style.left = `${x - 20}px`;
+    float.style.top = `${y - 30}px`;
+    document.body.appendChild(float);
+
+    setTimeout(() => float.remove(), 1500);
+}
+
+function startGame() {
+    if (isGameActive) return;
+    isGameActive = true;
+    score = 0;
+    combo = 0;
+    timeLeft = 30;
+    
+    scoreEl.textContent = 0;
+    comboEl.textContent = 0;
+    timerEl.textContent = 30;
+    timerBar.style.width = '100%';
+
+    timerId = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        timerBar.style.width = `${(timeLeft / 30) * 100}%`;
+
+        if (timeLeft <= 0) endGame();
+    }, 1000);
+}
+
+function endGame() {
+    clearInterval(timerId);
+    isGameActive = false;
+
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('neonClickerBest', bestScore);
+        bestScoreEl.textContent = bestScore;
+    }
+
+    setTimeout(() => {
+        alert(`🎉 Игра окончена!\n\nВаш счёт: ${score}\nКомбо: ${combo}x\n\nНовый рекорд! 🏆`);
+    }, 100);
+}
+
+clickBtn.addEventListener('click', (e) => {
+    if (!isGameActive) {
+        startGame();
+    }
+
+    if (isGameActive) {
+        score++;
+        combo++;
+        
+        scoreEl.textContent = score;
+        comboEl.textContent = combo;
+
+        // Случайный цвет кнопки
+        const hue = Math.random() * 360;
+        clickBtn.style.background = `linear-gradient(45deg, hsl(${hue}, 100%, 60%), hsl(${hue + 60}, 100%, 65%))`;
+
+        // Анимация +1
+        createFloatingScore(e.clientX, e.clientY);
+
+        // Звук
+        playClickSound();
+    }
+});
+
+// Кнопки управления
+document.getElementById('restart-btn').addEventListener('click', () => {
+    clearInterval(timerId);
+    isGameActive = false;
+    startGame();
+});
+
+document.getElementById('reset-all-btn').addEventListener('click', () => {
+    if (confirm('Сбросить рекорд?')) {
+        bestScore = 0;
+        localStorage.removeItem('neonClickerBest');
+        bestScoreEl.textContent = 0;
+    }
+});
+</script>
+
+</body>
+</html>

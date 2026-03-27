@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Портфолио | Айтмұқамбет</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="navbar">
+    <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+        
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle">
+                Проекты по курсу <span class="arrow">▼</span>
+            </a>
+            <ul class="dropdown-content">
+                <li><a href="games/PR2/clicker.html">Кликер</a></li>
+                <li><a href="games/PR2/adventures.html">Приключения</a></li>
+                <li><a href="games/PR2/guess.html">Угадай число</a></li>
+                <li style="height:1px; background:rgba(255,255,255,0.1); margin:8px 0;"></li>
+                <li><a href="games/PR3/reaction.html">Игра на реакцию</a></li>
+                <li><a href="games/PR3/tictactoe.html">Крестики-нолики</a></li>
+                <li><a href="games/PR3/maze.html">Лабиринт</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+  <section id="home" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-left">
+        <div class="hero-badges">
+          <span class="badge">Welcome to my universe</span>
+          <span class="badge purple">UI Magic</span>
+        </div>
+
+        <h1>
+          Hello<br>
+          I'm <span>Айтмұқамбет</span>
+        </h1>
+
+        <div class="hero-role">Frontend Developer | UI Designer | Student</div>
+
+        <p class="hero-text">
+          Занимаюсь разработкой приложений и изучением современных технологий.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="#projects" class="btn">Learn More</a>
+          <a href="#contact" class="btn btn-secondary">Get Resume</a>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="code-window">
+          <div class="window-header">
+            <span></span><span></span><span></span>
+            <p>developer.js</p>
+          </div>
+          <pre><code>const profile = {
+  name: 'Айтмұқамбет',
+  title: 'Frontend Developer | UI Designer | Student',
+  skills: ['HTML', 'CSS', 'JavaScript', 'React'],
+  hardWorker: true,
+  quickLearner: true,
+  problemSolver: true,
+  hireable: function() {
+    return (
+      this.hardWorker &amp;&amp;
+      this.problemSolver &amp;&amp;
+      this.skills.length &gt;= 4
+    );
+  }
+};</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" class="skills-section">
+    <div class="container">
+      <h2 class="section-title">Skills</h2>
+
+      <div class="skills-icons">
+        <div class="icon-circle">HTML</div>
+        <div class="icon-circle">CSS</div>
+        <div class="icon-circle">JS</div>
+        <div class="icon-circle">React</div>
+        <div class="icon-circle">Node</div>
+        <div class="icon-circle">Figma</div>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-box">
+          <h3>Frontend Development</h3>
+          <div class="tags">
+            <span>React</span>
+            <span>Next.js</span>
+            <span>TypeScript</span>
+            <span>Tailwind CSS</span>
+            <span>HTML5</span>
+            <span>CSS3</span>
+          </div>
+        </div>
+
+        <div class="skill-box">
+          <h3>Backend Development</h3>
+          <div class="tags">
+            <span>Node.js</span>
+            <span>Python</span>
+            <span>PostgreSQL</span>
+            <span>MongoDB</span>
+            <span>REST API</span>
+            <span>GraphQL</span>
+          </div>
+        </div>
+
+        <div class="skill-box">
+          <h3>UI/UX Design</h3>
+          <div class="tags">
+            <span>Figma</span>
+            <span>Responsive Design</span>
+            <span>Wireframing</span>
+            <span>Prototyping</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="experience-section">
+    <div class="container">
+      <h2 class="section-title">Professional Journey</h2>
+      <p class="section-subtitle">"Transforming ideas into digital reality, one project at a time"</p>
+
+      <div class="experience-grid">
+        <div class="exp-card">
+          <h3>WordPress Developer</h3>
+          <span class="exp-company">Freelance / Fiverr</span>
+          <span class="exp-date">2019 - 2020</span>
+          <p>узнавал что такое программирование.</p>
+        </div>
+
+        <div class="exp-card">
+          <h3>Junior Frontend Developer</h3>
+          <span class="exp-company">проекты</span>
+          <span class="exp-date">2021 - 2023</span>
+          <p>начал увлекатся программированием</p>
+        </div>
+
+        <div class="exp-card">
+          <h3>JavaScript Developer</h3>
+          <span class="exp-company">Личные проекты</span>
+          <span class="exp-date">2023 - настоящее время</span>
+          <p>Разрабатываю современные веб-интерфейсы и мини-приложения.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education" class="education-section">
+    <div class="container">
+      <h2 class="section-title">Educational Journey</h2>
+      <p class="section-subtitle">Мой путь в обучении и развитии в сфере IT</p>
+
+      <div class="education-grid">
+        <div class="education-card">
+          <h3>Торайгыров Университет</h3>
+          <p class="edu-date">2024 - настоящее время</p>
+          <p><strong>Специальность:</strong> Computer Science</p>
+          <p>Изучаю разработку веб-приложений и современные IT-направления.</p>
+        </div>
+
+        <div class="education-card">
+          <h3>Высший колледж электроники и коммуникаций</h3>
+          <p class="edu-date">2022 - 2024</p>
+          <p><strong>Специальность:</strong> ПО-программное обеспечение</p>
+          <p>Получил техническую базу по программированию и информационным системам.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="projects-section">
+    <div class="container">
+      <h2 class="section-title">Projects</h2>
+
+      <div class="project-card">
+        <div class="project-image">
+          <img src="img/mern.png" alt="Превью проекта">
+        </div>
+
+        <div class="project-content">
+          <span class="project-label">Project 1</span>
+          <h3>Современный JavaScript проект</h3>
+          <p>
+            Проект с современным интерфейсом, карточками, анимациями и адаптивной версткой.
+          </p>
+
+          <div class="project-links">
+            <a href="#">Code</a>
+            <a href="#">Live</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <div class="container contact-grid">
+      <div class="contact-info">
+        <h2 class="section-title left">Get in Touch</h2>
+        <p>Есть вопрос или хочешь поработать вместе? Напиши мне.</p>
+
+        <div class="contact-item">
+          <h4>Email</h4>
+          <p>yourmail@example.com</p>
+        </div>
+
+        <div class="contact-item">
+          <h4>Location</h4>
+          <p>Павлодар, Казахстан</p>
+        </div>
+      </div>
+
+      <form class="contact-form">
+        <input type="text" placeholder="Your Name">
+        <input type="email" placeholder="Your Email">
+        <input type="text" placeholder="Subject">
+        <textarea placeholder="Your Message"></textarea>
+        <button type="submit" class="btn">Send Message</button>
+      </form>
+    </div>
+  </section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dropdown = document.querySelector('.dropdown');
+    
+    dropdown.querySelector('.dropdown-toggle').addEventListener('click', (e) => {
+        e.preventDefault();
+        dropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown')) {
+            dropdown.classList.remove('active');
+        }
+    });
+});
+</script>
+</body>
+</html>

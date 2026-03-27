@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Тест реакции</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #27ae60;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            z-index: 10;
+        }
+
+        #target {
+            position: absolute;
+            padding: 15px 25px;
+            background: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+            transition: transform 0.1s;
+        }
+
+        #target:active {
+            transform: scale(0.9);
+        }
+
+        .start-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        button.main-btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="stats-panel">
+        <div>Осталось времени: <span id="timer">30</span>с</div>
+        <div>Нажатий: <span id="clicks">0</span></div>
+    </div>
+
+    <div id="start-screen" class="start-screen">
+        <h1>Проверь свою реакцию!</h1>
+        <p>Жми на кнопку, как только она появится.</p>
+        <button class="main-btn" onclick="startGame()">Начать игру</button>
+    </div>
+
+    <button id="target" onclick="hit()">НАЖМИ МЕНЯ!</button>
+
+    <script>
+        let clicks = 0;
+        let timeLeft = 30;
+        let gameTimer = null;
+        let appearanceTime; // Время появления кнопки
+        let totalReactionTime = 0;
+
+        const target = document.getElementById('target');
+        const clicksDisplay = document.getElementById('clicks');
+        const timerDisplay = document.getElementById('timer');
+        const startScreen = document.getElementById('start-screen');
+
+        function startGame() {
+            clicks = 0;
+            timeLeft = 30;
+            totalReactionTime = 0;
+            clicksDisplay.textContent = clicks;
+            timerDisplay.textContent = timeLeft;
+            startScreen.style.display = 'none';
+
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+
+            moveButton();
+        }
+
+        function moveButton() {
+            if (timeLeft <= 0) return;
+
+            target.style.display = 'none';
+
+            const delay = Math.random() * 1500 + 500;
+
+            setTimeout(() => {
+                if (timeLeft <= 0) return;
+
+                const x = Math.random() * (window.innerWidth - 150);
+                const y = Math.random() * (window.innerHeight - 150) + 60;
+
+                target.style.left = x + 'px';
+                target.style.top = y + 'px';
+                target.style.display = 'block';
+
+                appearanceTime = Date.now();
+            }, delay);
+        }
+
+        function hit() {
+            const reaction = Date.now() - appearanceTime;
+            totalReactionTime += reaction;
+            clicks++;
+            clicksDisplay.textContent = clicks;
+            moveButton();
+        }
+
+        function endGame() {
+            clearInterval(gameTimer);
+            target.style.display = 'none';
+
+            const avgReaction = clicks > 0 ? (totalReactionTime / clicks / 1000).toFixed(3) : 0;
+
+            alert(`Игра окончена!\nВсего нажатий: ${clicks}\nСреднее время реакции: ${avgReaction} сек.`);
+            startScreen.style.display = 'block';
+        }
+    </script>
+
+</body>
+
+</html>

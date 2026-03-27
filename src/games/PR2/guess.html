@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>🎯 Угадай Число</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #1e0533, #2a1b4d, #0f0c29);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.game-container {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    padding: 40px 35px;
+    border-radius: 24px;
+    width: 420px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+h1 {
+    margin: 0 0 10px 0;
+    font-size: 36px;
+    background: linear-gradient(90deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+p {
+    margin: 15px 0 25px;
+    opacity: 0.9;
+    font-size: 17px;
+}
+
+#attempts-box {
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+
+#guess-input {
+    width: 120px;
+    height: 60px;
+    font-size: 32px;
+    text-align: center;
+    border: 3px solid #a855f7;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+#guess-input:focus {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.3);
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-check {
+    background: linear-gradient(45deg, #a855f7, #ec4899);
+    color: white;
+}
+
+.btn-hint {
+    background: linear-gradient(45deg, #eab308, #f59e0b);
+    color: white;
+}
+
+.btn-reset {
+    background: linear-gradient(45deg, #22c55e, #16a34a);
+    color: white;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+#message {
+    min-height: 60px;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 25px 0;
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.4s;
+}
+
+.history {
+    text-align: left;
+    max-height: 180px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.25);
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-top: 20px;
+}
+
+.history p {
+    margin: 6px 0;
+    padding: 4px 0;
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 13px;
+    opacity: 0.6;
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🎯 Угадай Число</h1>
+    <p>Я загадал число от <strong>1 до 100</strong>.<br>У тебя 10 попыток!</p>
+
+    <div id="attempts-box">Осталось попыток: <strong><span id="attempts">10</span></strong></div>
+
+    <input type="number" id="guess-input" placeholder="?" min="1" max="100" autocomplete="off">
+
+    <div class="buttons">
+        <button class="btn-check" onclick="checkGuess()">Проверить</button>
+        <button class="btn-hint" onclick="giveHint()" id="hint-btn">Подсказка (1 раз)</button>
+        <button class="btn-reset" onclick="initGame()">Новая игра</button>
+    </div>
+
+    <div id="message">Введи число и нажми «Проверить»</div>
+
+    <div class="history">
+        <strong>История попыток:</strong>
+        <div id="history-log"></div>
+    </div>
+
+    <div class="footer">Удачи! ✨</div>
+</div>
+
+<script>
+let targetNumber = 0;
+let attemptsLeft = 10;
+let hintUsed = false;
+let gameOver = false;
+
+const input = document.getElementById('guess-input');
+const messageEl = document.getElementById('message');
+const attemptsEl = document.getElementById('attempts');
+const historyLog = document.getElementById('history-log');
+const hintBtn = document.getElementById('hint-btn');
+
+function initGame() {
+    targetNumber = Math.floor(Math.random() * 100) + 1;
+    attemptsLeft = 10;
+    hintUsed = false;
+    gameOver = false;
+    
+    attemptsEl.textContent = attemptsLeft;
+    messageEl.textContent = "Я загадал новое число от 1 до 100!";
+    messageEl.style.background = "transparent";
+    messageEl.style.color = "#ddd";
+    
+    input.value = "";
+    input.disabled = false;
+    input.focus();
+    
+    historyLog.innerHTML = "";
+    hintBtn.disabled = false;
+    hintBtn.style.opacity = "1";
+}
+
+function addToHistory(guess, result) {
+    const entry = document.createElement('p');
+    entry.innerHTML = `<strong>${guess}</strong> — ${result}`;
+    
+    if (result.includes("Победа")) entry.style.color = "#22c55e";
+    else if (result.includes("Больше")) entry.style.color = "#60a5fa";
+    else if (result.includes("Меньше")) entry.style.color = "#f87171";
+    
+    historyLog.prepend(entry);
+}
+
+function checkGuess() {
+    if (gameOver) return;
+    
+    const guess = parseInt(input.value);
+    
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+        messageEl.textContent = "Введите число от 1 до 100!";
+        messageEl.style.color = "#f59e0b";
+        return;
+    }
+
+    attemptsLeft--;
+    attemptsEl.textContent = attemptsLeft;
+
+    let resultText = "";
+
+    if (guess === targetNumber) {
+        messageEl.innerHTML = `🎉 <strong>Победа!</strong><br>Это было число ${targetNumber}!`;
+        messageEl.style.background = "rgba(34, 197, 94, 0.2)";
+        messageEl.style.color = "#22c55e";
+        gameOver = true;
+        input.disabled = true;
+        resultText = "🎉 Победа!";
+    } 
+    else if (attemptsLeft === 0) {
+        messageEl.innerHTML = `💀 Игра окончена!<br>Загаданное число: <strong>${targetNumber}</strong>`;
+        messageEl.style.background = "rgba(239, 68, 68, 0.2)";
+        messageEl.style.color = "#ef4444";
+        gameOver = true;
+        input.disabled = true;
+        resultText = "💀 Конец попыток";
+    } 
+    else if (guess < targetNumber) {
+        messageEl.textContent = "↑ Больше!";
+        messageEl.style.color = "#60a5fa";
+        resultText = "Больше ↑";
+    } 
+    else {
+        messageEl.textContent = "↓ Меньше!";
+        messageEl.style.color = "#f87171";
+        resultText = "Меньше ↓";
+    }
+
+    addToHistory(guess, resultText);
+    input.value = "";
+    input.focus();
+}
+
+function giveHint() {
+    if (hintUsed || gameOver) return;
+    
+    hintUsed = true;
+    hintBtn.disabled = true;
+    hintBtn.style.opacity = "0.4";
+
+    const hint = targetNumber > 50 ? 
+        "Число больше 50" : 
+        "Число меньше или равно 50";
+
+    messageEl.textContent = `Подсказка: ${hint}`;
+    messageEl.style.color = "#eab308";
+}
+
+// Поддержка нажатия Enter
+input.addEventListener('keypress', (e) => {
+    if (e.key === "Enter") checkGuess();
+});
+
+// Запуск первой игры
+initGame();
+</script>
+
+</body>
+</html>
